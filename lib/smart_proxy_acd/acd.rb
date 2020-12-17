@@ -15,7 +15,7 @@ module Proxy
         if !Dir.exist? settings.playbook_path
           Dir.mkdir settings.playbook_path
         end
-        if !(File.writeable?(settings.playbook_path) && File.readable?(settings.playbook_path))
+        if !(File.writable?(settings.playbook_path) && File.readable?(settings.playbook_path))
           raise "StorageDir #{settings.playbook_path.inspect} not read-/writeable"
         end
       end
