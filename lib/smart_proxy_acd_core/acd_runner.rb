@@ -33,20 +33,27 @@ module SmartProxyAcdCore
 
       raise "'playbook-name' need to be specified" if @playbook_name.nil? || @playbook_name.empty?
       raise "'playbook-path' need to be specified" if @playbook_path.nil? || @playbook_path.empty?
-     end
-
+    end
 
     def write_inventory
       inventory = Tempfile.new('acd_inventory')
       inventory << @acd_job['inventory']
-      inventory.flush
+      inventory << "\n"
       inventory.close
       @inventory_path = inventory.path
     end
 
+    def environment
+      env={}
+      env['ANSIBLE_CALLBACK_WHITELIST'] = ''
+      env['ANSIBLE_LOAD_CALLBACK_PLUGINS'] = '0'
+      env
+    end
+
     def generate_command
       logger.debug("Generate command with #{@inventory_path} to run #{@playbook_name} with path #{@playbook_path}")
-      command = %w[ansible-playbook]
+      command = [environment]
+      command << "ansible-playbook"
       command << "-i"
       command << @inventory_path
       command << "-v" if @acd_job['verbose'] == true
@@ -54,7 +61,7 @@ module SmartProxyAcdCore
         command << "--extra-vars"
         command << "'#{@acd_job['extra-vars']}'"
       end
-      command << "'#{@playbook_path}'"
+      command << "#{@playbook_path}"
       command
     end
   end
