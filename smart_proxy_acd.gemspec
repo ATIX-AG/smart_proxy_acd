@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
   s.authors = ['Markus Bucher']
   s.email = 'info@atix.de'
   s.extra_rdoc_files = ['README.md', 'LICENSE']
-  s.files = Dir['{lib,settings.d,bundler.d}/**/*'] + s.extra_rdoc_files
+  s.files = Dir['{lib/smart_proxy_acd,settings.d,bundler.d}/**/*'] + ['lib/smart_proxy_acd.rb'] + s.extra_rdoc_files
   s.homepage = 'http://github.com/ATIX-AG/smart_proxy_acd'
   s.license = 'GPLv3'
 end
