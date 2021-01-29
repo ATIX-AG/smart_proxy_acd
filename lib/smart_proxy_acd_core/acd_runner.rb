@@ -3,13 +3,14 @@ require 'tempfile'
 require 'rest-client'
 require 'tmpdir'
 
+# rubocop:disable ClassLength
+
 module SmartProxyAcdCore
   # Implements the AcdRunner to be used by foreman_remote_execution
   class AcdRunner < ForemanTasksCore::Runner::CommandRunner
     DEFAULT_REFRESH_INTERVAL = 1
 
     class << self
-
       def parse_dynflow_settings(path)
         return @dynflow_settings if defined? @dynflow_settings
         if File.exist?(path)
@@ -52,8 +53,8 @@ module SmartProxyAcdCore
 
     def get_playbook(playbook_id)
       logger.debug("Get playbook with id #{playbook_id}")
-      response = playbook_resource(playbook_id).get()
-      if response.code.to_s != "200"
+      response = playbook_resource(playbook_id).get
+      if response.code.to_s != '200'
         raise "Failed performing callback to Foreman server: #{response.code} #{response.body}"
       end
       tmp_file = Tempfile.new.path
@@ -68,17 +69,17 @@ module SmartProxyAcdCore
     end
 
     def store_playbook
-      logger.debug("Unpack ansible playbook")
+      logger.debug('Unpack ansible playbook')
       dir = Dir.mktmpdir
-      raise "Could not create temporary directory to run ansible playbook" if dir.nil? || !Dir.exists?(dir)
+      raise 'Could not create temporary directory to run ansible playbook' if dir.nil? || !Dir.exist?(dir)
       command = "base64 -d #{@playbook_tmp_base64_file} | tar xz -C #{dir}"
       system(command)
       @playbook_tmp_dir = dir
     end
 
     def cleanup
-      File.unlink(@playbook_tmp_base64_file) if File.exists?(@playbook_tmp_base64_file)
-      FileUtils.rm_rf(@playbook_tmp_dir) if Dir.exists?(@playbook_tmp_dir)
+      File.unlink(@playbook_tmp_base64_file) if File.exist?(@playbook_tmp_base64_file)
+      FileUtils.rm_rf(@playbook_tmp_dir) if Dir.exist?(@playbook_tmp_dir)
     end
 
     def start
@@ -89,9 +90,9 @@ module SmartProxyAcdCore
       store_playbook
 
       @playbook_path = File.join(@playbook_tmp_dir, @playbook_file)
-      raise "Could not run playbook: playbook file #{@playbook_file} not found in playbook dir #{@playbook_tmp_dir}" unless File.exists?(@playbook_path)
+      raise "Could not run playbook: playbook file #{@playbook_file} not found in playbook dir #{@playbook_tmp_dir}" unless File.exist?(@playbook_path)
 
-      publish_data("Write temporary inventory", 'stdout')
+      publish_data('Write temporary inventory', 'stdout')
       write_inventory
 
       command = generate_command
@@ -113,7 +114,7 @@ module SmartProxyAcdCore
     private
 
     def parse_acd_job
-      @acd_job = YAML.load(@options['script'])
+      @acd_job = YAML.safe_load(@options['script'])
       @application_name = @acd_job['application_name']
       @playbook_id = @acd_job['playbook_id']
       @playbook_file = @acd_job['playbook_file']
@@ -131,7 +132,7 @@ module SmartProxyAcdCore
     end
 
     def environment
-      env={}
+      env = {}
       env['ANSIBLE_CALLBACK_WHITELIST'] = ''
       env['ANSIBLE_LOAD_CALLBACK_PLUGINS'] = '0'
       env
@@ -140,16 +141,18 @@ module SmartProxyAcdCore
     def generate_command
       logger.debug("Generate command with #{@inventory_path} to run #{@playbook_id} with path #{@playbook_path}")
       command = [environment]
-      command << "ansible-playbook"
-      command << "-i"
+      command << 'ansible-playbook'
+      command << '-i'
       command << @inventory_path
-      command << "-v" if @acd_job['verbose'] == true
-      if @acd_job.has_key?('extra_vars') && !@acd_job['extra_vars'].nil? && !@acd_job['extra_vars'].empty?
-        command << "--extra-vars"
+      command << '-v' if @acd_job['verbose'] == true
+      if @acd_job.key?('extra_vars') && !@acd_job['extra_vars'].nil? && !@acd_job['extra_vars'].empty?
+        command << '--extra-vars'
         command << "'#{@acd_job['extra_vars']}'"
       end
-      command << "#{@playbook_path}"
+      command << @playbook_path.to_s
       command
     end
   end
 end
+
+# rubocop:enable ClassLength

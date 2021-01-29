@@ -12,4 +12,6 @@ Gem::Specification.new do |s|
   s.files = Dir['{lib/smart_proxy_acd,settings.d,bundler.d}/**/*'] + ['lib/smart_proxy_acd.rb'] + s.extra_rdoc_files
   s.homepage = 'http://github.com/ATIX-AG/smart_proxy_acd'
   s.license = 'GPLv3'
+
+  s.add_development_dependency('rubocop', '0.50.0')
 end

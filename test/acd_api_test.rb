@@ -16,5 +16,4 @@ class AcdApiTest < Test::Unit::TestCase
   def test_returns_hello_greeting
     # add test here
   end
-
 end
