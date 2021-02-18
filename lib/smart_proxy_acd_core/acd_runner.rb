@@ -138,13 +138,30 @@ module SmartProxyAcdCore
       env
     end
 
+    def setup_verbosity
+      verbosity_level = @acd_job['verbose'].split(' ').first.to_i
+      verbosity = '-'
+      verbosity_level.times do
+        verbosity += 'v'
+      end
+      verbosity
+    end
+
+    def verbose?
+      verbosity_level = @acd_job['verbose'].split(' ').first.to_i
+      !verbosity_level.nil? && verbosity_level.to_i.positive?
+    end
+
     def generate_command
+      re = /^\w+(\s*,\s*\w+)*$/
       logger.debug("Generate command with #{@inventory_path} to run #{@playbook_id} with path #{@playbook_path}")
       command = [environment]
       command << 'ansible-playbook'
       command << '-i'
       command << @inventory_path
-      command << '-v' if @acd_job['verbose'] == true
+      command << setup_verbosity if verbose?
+      command << format('--tags "%s"', @acd_job['tags']) if @acd_job['tags'] && @acd_job['tags'].match?(re)
+      command << format('--skip-tags "%s"', @acd_job['skip_tags']) if @acd_job['skip_tags'] && @acd_job['skip_tags'].match?(re)
       if @acd_job.key?('extra_vars') && !@acd_job['extra_vars'].nil? && !@acd_job['extra_vars'].empty?
         command << '--extra-vars'
         command << "'#{@acd_job['extra_vars']}'"
