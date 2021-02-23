@@ -139,17 +139,17 @@ module SmartProxyAcdCore
     end
 
     def setup_verbosity
-      verbosity_level = @acd_job['verbose'].split(' ').first.to_i
-      verbosity = '-'
-      verbosity_level.times do
-        verbosity += 'v'
+      verbosity = ''
+      if @acd_job['verbose']
+        verbosity_level = @acd_job['verbose'].split(' ').first.to_i
+        if verbosity_level.to_i.positive?
+          verbosity = '-'
+          verbosity_level.times do
+            verbosity += 'v'
+          end
+        end
       end
       verbosity
-    end
-
-    def verbose?
-      verbosity_level = @acd_job['verbose'].split(' ').first.to_i
-      !verbosity_level.nil? && verbosity_level.to_i.positive?
     end
 
     def generate_command
@@ -159,7 +159,7 @@ module SmartProxyAcdCore
       command << 'ansible-playbook'
       command << '-i'
       command << @inventory_path
-      command << setup_verbosity if verbose?
+      command << setup_verbosity
       command << format('--tags "%s"', @acd_job['tags']) if @acd_job['tags'] && @acd_job['tags'].match?(re)
       command << format('--skip-tags "%s"', @acd_job['skip_tags']) if @acd_job['skip_tags'] && @acd_job['skip_tags'].match?(re)
       if @acd_job.key?('extra_vars') && !@acd_job['extra_vars'].nil? && !@acd_job['extra_vars'].empty?
