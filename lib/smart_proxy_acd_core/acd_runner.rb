@@ -96,7 +96,7 @@ module SmartProxyAcdCore
       write_inventory
 
       command = generate_command
-      logger.debug("Running command '#{command.join(' ')}'")
+      logger.debug("Running command #{command.join(' ')}")
       initialize_command(*command)
     end
 
@@ -142,7 +142,7 @@ module SmartProxyAcdCore
       verbosity = ''
       if @acd_job['verbose']
         verbosity_level = @acd_job['verbose'].split(' ').first.to_i
-        if verbosity_level.to_i.positive?
+        if verbosity_level.positive?
           verbosity = '-'
           verbosity_level.times do
             verbosity += 'v'
@@ -163,7 +163,8 @@ module SmartProxyAcdCore
       command << 'ansible-playbook'
       command << '-i'
       command << @inventory_path
-      command << setup_verbosity
+      verbose = setup_verbosity
+      command << verbose unless verbose.empty?
       command << "--tags '#{@acd_job['tags']}'" if valid_tags('tags')
       command << "--skip-tags '#{@acd_job['skip_tags']}'" if valid_tags('skip_tags')
       if @acd_job.key?('extra_vars') && !@acd_job['extra_vars'].nil? && !@acd_job['extra_vars'].empty?
