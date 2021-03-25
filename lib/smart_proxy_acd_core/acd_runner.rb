@@ -2,6 +2,7 @@ require 'foreman_tasks_core/runner/command_runner'
 require 'tempfile'
 require 'rest-client'
 require 'tmpdir'
+require 'socket'
 
 # rubocop:disable ClassLength
 
@@ -123,12 +124,19 @@ module SmartProxyAcdCore
       raise "'playbook_id' need to be specified" if @playbook_id.nil?
     end
 
+    def proxy_hostname
+      Socket.gethostbyname(Socket.gethostname).first
+    end
+
     def write_inventory
-      inventory = Tempfile.new('acd_inventory')
-      inventory << @acd_job['inventory']
-      inventory << "\n"
-      inventory.close
-      @inventory_path = inventory.path
+      complete_inventory = YAML.safe_load(@acd_job['inventory'])
+      my_inventory = complete_inventory[proxy_hostname]
+
+      tmp_inventory_file = Tempfile.new('acd_inventory')
+      tmp_inventory_file << my_inventory.to_yaml
+      tmp_inventory_file << "\n"
+      tmp_inventory_file.close
+      @inventory_path = tmp_inventory_file.path
     end
 
     def environment
