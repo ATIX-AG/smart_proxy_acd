@@ -6,7 +6,7 @@ require 'socket'
 
 # rubocop:disable ClassLength
 
-module SmartProxyAcdCore
+module Proxy::Acd
   # Implements the AcdRunner to be used by foreman_remote_execution
   class AcdRunner < ForemanTasksCore::Runner::CommandRunner
     DEFAULT_REFRESH_INTERVAL = 1

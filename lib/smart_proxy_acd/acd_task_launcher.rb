@@ -1,4 +1,4 @@
-module SmartProxyAcdCore
+module Proxy::Acd
   # Implements the TaskLauncher::Batch for Acd
   class AcdTaskLauncher < ForemanTasksCore::TaskLauncher::Batch
     # Implements the Runner::Action for Acd
@@ -8,7 +8,7 @@ module SmartProxyAcdCore
           :step_id => run_step_id,
           :uuid => execution_plan_id
         }
-        ::SmartProxyAcdCore::AcdRunner.new(
+        ::Proxy::Acd::AcdRunner.new(
           input.merge(additional_options),
           :suspended_action => suspended_action
         )
