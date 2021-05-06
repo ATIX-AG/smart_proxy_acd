@@ -65,7 +65,7 @@ module Proxy
       end
 
       def playbook_resource(playbook_id)
-        dynflow_settings = self.class.parse_dynflow_settings('/etc/smart_proxy_dynflow_core/settings.yml')
+        dynflow_settings = self.class.parse_dynflow_settings('/etc/foreman-proxy/settings.yml')
         playbook_url = dynflow_settings['foreman_url'] + "/acd/api/v2/ansible_playbooks/#{playbook_id}/grab"
         @resource ||= RestClient::Resource.new(playbook_url, self.class.parse_ssl_options)
       end
