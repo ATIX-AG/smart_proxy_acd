@@ -1,4 +1,4 @@
-require 'foreman_tasks_core/runner/command_runner'
+require 'smart_proxy_dynflow/runner/command_runner'
 require 'tempfile'
 require 'rest-client'
 require 'tmpdir'
@@ -9,7 +9,7 @@ require 'socket'
 module Proxy
   module Acd
     # Implements the AcdRunner to be used by foreman_remote_execution
-    class AcdRunner < ForemanTasksCore::Runner::CommandRunner
+    class AcdRunner < Proxy::Dynflow::Runner::CommandRunner
       DEFAULT_REFRESH_INTERVAL = 1
 
       class << self

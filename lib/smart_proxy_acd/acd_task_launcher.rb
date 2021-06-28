@@ -1,9 +1,9 @@
 module Proxy
   module Acd
     # Implements the TaskLauncher::Batch for Acd
-    class AcdTaskLauncher < ForemanTasksCore::TaskLauncher::Batch
+    class AcdTaskLauncher < Proxy::Dynflow::TaskLauncher::Batch
       # Implements the Runner::Action for Acd
-      class AcdRunnerAction < ForemanTasksCore::Runner::Action
+      class AcdRunnerAction < Proxy::Dynflow::Action::Runner
         def initiate_runner
           additional_options = {
             :step_id => run_step_id,
@@ -17,8 +17,8 @@ module Proxy
       end
 
       def child_launcher(parent)
-        ForemanTasksCore::TaskLauncher::Single.new(world, callback, :parent => parent,
-                                                                    :action_class_override => AcdRunnerAction)
+        Proxy::Dynflow::TaskLauncher::Single.new(world, callback, :parent => parent,
+                                                                  :action_class_override => AcdRunnerAction)
       end
     end
   end
