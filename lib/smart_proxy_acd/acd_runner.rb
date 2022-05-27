@@ -4,6 +4,7 @@ require 'tempfile'
 require 'rest-client'
 require 'tmpdir'
 require 'socket'
+require 'proxy/request'
 
 # rubocop:disable ClassLength
 
@@ -13,42 +14,6 @@ module Proxy
     class AcdRunner < Proxy::Dynflow::Runner::CommandRunner
       DEFAULT_REFRESH_INTERVAL = 1
 
-      class << self
-        def parse_dynflow_settings(path)
-          return @dynflow_settings if defined? @dynflow_settings
-          if File.exist?(path)
-            @dynflow_settings = {}
-            YAML.load_file(path).each do |key, value|
-              @dynflow_settings[key.to_s] = value
-            end
-          end
-          @dynflow_settings
-        end
-
-        def parse_ssl_options
-          return @ssl_options if defined? @ssl_options
-
-          @ssl_options = {}
-          return @ssl_options unless URI.parse(@dynflow_settings['foreman_url']).scheme == 'https'
-
-          @ssl_options[:verify_ssl] = OpenSSL::SSL::VERIFY_PEER
-
-          private_key_file = @dynflow_settings['foreman_ssl_key'] || @dynflow_settings['ssl_private_key']
-          if private_key_file
-            private_key = File.read(private_key_file)
-            @ssl_options[:ssl_client_key] = OpenSSL::PKey::RSA.new(private_key)
-          end
-          certificate_file = @dynflow_settings['foreman_ssl_cert'] || @dynflow_settings['ssl_certificate']
-          if certificate_file
-            certificate = File.read(certificate_file)
-            @ssl_options[:ssl_client_cert] = OpenSSL::X509::Certificate.new(certificate)
-          end
-          ca_file = @dynflow_settings['foreman_ssl_ca'] || @dynflow_settings['ssl_ca_file']
-          @ssl_options[:ssl_ca_file] = ca_file if ca_file
-          @ssl_options
-        end
-      end
-
       def initialize(options, suspended_action:)
         super(options, :suspended_action => suspended_action)
         @options = options
@@ -56,19 +21,21 @@ module Proxy
 
       def get_playbook(playbook_id)
         logger.debug("Get playbook with id #{playbook_id}")
-        response = playbook_resource(playbook_id).get
+        response = playbook_resource(playbook_id)
         if response.code.to_s != '200'
           raise "Failed performing callback to Foreman server: #{response.code} #{response.body}"
         end
         tmp_file = Tempfile.new.path
-        File.write(tmp_file, response)
+        File.write(tmp_file, response.body)
         @playbook_tmp_base64_file = tmp_file
       end
 
       def playbook_resource(playbook_id)
-        dynflow_settings = self.class.parse_dynflow_settings('/etc/foreman-proxy/settings.yml')
-        playbook_url = dynflow_settings['foreman_url'] + "/acd/api/v2/ansible_playbooks/#{playbook_id}/grab"
-        @resource ||= RestClient::Resource.new(playbook_url, self.class.parse_ssl_options)
+        playbook_download_path = "/acd/api/v2/ansible_playbooks/#{playbook_id}/grab"
+        foreman_request = Proxy::HttpRequest::ForemanRequest.new
+        req = foreman_request.request_factory.create_get(playbook_download_path)
+        foreman_request.http.read_timeout = Proxy::Acd::Plugin.settings.timeout
+        foreman_request.send_request(req)
       end
 
       def store_playbook
