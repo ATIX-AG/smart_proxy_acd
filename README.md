@@ -14,7 +14,6 @@ This plug-in adds support for [Application Centric Deployment](https://github.co
 
 We expect your proxy to also have
 [smart_proxy_dynflow](https://github.com/theforeman/smart_proxy_dynflow)
-and [foreman-tasks-core](https://github.com/theforeman/foreman-tasks) as
 a gem requirement.
 
 ### Get the code
