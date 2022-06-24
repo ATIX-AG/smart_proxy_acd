@@ -134,6 +134,12 @@ module Proxy
         complete_inventory = YAML.safe_load(@acd_job['inventory'])
         my_inventory = complete_inventory[proxy_hostname]
 
+        my_inventory['all']['children'].each_value do |group|
+          group['hosts'].each_value do |host_vars|
+            host_vars['ansible_ssh_private_key_file'] ||= Proxy::RemoteExecution::Ssh::Plugin.settings[:ssh_identity_key_file]
+          end
+        end
+
         tmp_inventory_file = Tempfile.new('acd_inventory')
         tmp_inventory_file << my_inventory.to_yaml
         tmp_inventory_file << "\n"
