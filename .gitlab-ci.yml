@@ -8,5 +8,7 @@ lint:
     - docker
   image: ${CI_REGISTRY}/hub/lint/ruby:2-6
   script:
+    - apt-get update
+    - apt-get -y install sqlite3 libsqlite3-dev
     - bundle install --path vendor/bundle
     - bundle exec rubocop
