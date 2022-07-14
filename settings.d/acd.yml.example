@@ -1,2 +1,4 @@
 ---
 :enabled: true
+# The time we wait till the request to download the ansible playbook should be answered by the Foreman, in seconds.
+:timeout: 60

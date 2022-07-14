@@ -13,6 +13,8 @@ module Proxy
         require 'smart_proxy_acd/acd_task_launcher'
       end
 
+      default_settings :timeout => 60
+
       load_dependency_injection_wirings do |_container_instance, _settings|
         Proxy::Dynflow::TaskLauncherRegistry.register('acd', AcdTaskLauncher)
       end
